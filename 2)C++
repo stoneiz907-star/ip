@@ -1,0 +1,165 @@
+#include <iostream>
+#include <unordered_set>
+
+struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(nullptr) {}
+};
+
+class Solution {
+public:
+    // Ôóíêöèÿ ïîèñêà öèêëà (àëãîðèòì ×åðåïàõè è Çàéöà)
+    bool hasCycle(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) {
+            return false;
+        }
+
+        ListNode* slow = head; // ×åðåïàõà (äâèãàåòñÿ íà 1 óçåë)
+        ListNode* fast = head; // Çàÿö (äâèãàåòñÿ íà 2 óçëà)
+
+        while (fast != nullptr && fast->next != nullptr) {
+            slow = slow->next;          // ×åðåïàõà íà øàã
+            fast = fast->next->next;    // Çàÿö íà äâà øàãà
+
+            if (slow == fast) {         // Åñëè âñòðåòèëèñü - åñòü öèêë
+                return true;
+            }
+        }
+
+        return false; // Åñëè fast äîøåë äî êîíöà - öèêëà íåò
+    }
+
+    // Ôóíêöèÿ äëÿ áåçîïàñíîãî âûâîäà ñïèñêà (îãðàíè÷èâàåò êîëè÷åñòâî ýëåìåíòîâ)
+    void printList(ListNode* head, int maxNodes = 10) {
+        if (head == nullptr) {
+            std::cout << "NULL" << std::endl;
+            return;
+        }
+
+        std::unordered_set<ListNode*> visited;
+        int count = 0;
+        ListNode* current = head;
+
+        while (current != nullptr && count < maxNodes) {
+            std::cout << current->val;
+
+            // Ïðîâåðÿåì, áûë ëè óçåë óæå ïîñåùåí (äëÿ îáíàðóæåíèÿ öèêëà)
+            if (visited.count(current)) {
+                std::cout << " -> [ÖÈÊË ê óçëó " << current->val << "]";
+                break;
+            }
+            visited.insert(current);
+
+            if (current->next != nullptr) {
+                std::cout << " -> ";
+            }
+
+            current = current->next;
+            count++;
+        }
+
+        if (count >= maxNodes) {
+            std::cout << " ... (ïðåâûøåí ëèìèò " << maxNodes << " óçëîâ)";
+        }
+        else if (current == nullptr) {
+            std::cout << " -> NULL";
+        }
+
+        std::cout << std::endl;
+    }
+
+    // Ôóíêöèÿ äëÿ îïðåäåëåíèÿ äëèíû öèêëà (åñëè åñòü)
+    int cycleLength(ListNode* head) {
+        if (!hasCycle(head)) return 0;
+
+        ListNode* slow = head;
+        ListNode* fast = head;
+
+        // Íàõîäèì òî÷êó âñòðå÷è
+        do {
+            slow = slow->next;
+            fast = fast->next->next;
+        } while (slow != fast);
+
+        // Èçìåðÿåì äëèíó öèêëà
+        int length = 1;
+        fast = fast->next;
+        while (fast != slow) {
+            fast = fast->next;
+            length++;
+        }
+
+        return length;
+    }
+};
+
+// Äåìîíñòðàöèÿ
+int main() {
+    setlocale(LC_ALL, "");
+
+    Solution solution;
+
+    // Ñîçäàåì ñïèñîê ñ öèêëîì: 1 -> 2 -> 3 -> 4 -> 5 -> 2 (öèêë)
+    std::cout << "=== Ñïèñîê ñ öèêëîì ===" << std::endl;
+    ListNode* head = new ListNode(1);
+    head->next = new ListNode(2);
+    head->next->next = new ListNode(3);
+    head->next->next->next = new ListNode(4);
+    head->next->next->next->next = new ListNode(5);
+    head->next->next->next->next->next = head->next; // Ñîçäàåì öèêë íà óçåë 2
+
+    std::cout << "Ñòðóêòóðà ñïèñêà: ";
+    solution.printList(head);
+
+    bool hasCycle = solution.hasCycle(head);
+    std::cout << "Ñïèñîê ñîäåðæèò öèêë: " << (hasCycle ? "Äà" : "Íåò") << std::endl;
+
+    if (hasCycle) {
+        std::cout << "Äëèíà öèêëà: " << solution.cycleLength(head) << " óçëîâ" << std::endl;
+    }
+
+    std::cout << std::endl;
+
+    // Ñîçäàåì ñïèñîê áåç öèêëà: 1 -> 2 -> 3 -> 4 -> 5
+    std::cout << "=== Ñïèñîê áåç öèêëà ===" << std::endl;
+    ListNode* head2 = new ListNode(1);
+    head2->next = new ListNode(2);
+    head2->next->next = new ListNode(3);
+    head2->next->next->next = new ListNode(4);
+    head2->next->next->next->next = new ListNode(5);
+
+    std::cout << "Ñòðóêòóðà ñïèñêà: ";
+    solution.printList(head2);
+
+    bool hasCycle2 = solution.hasCycle(head2);
+    std::cout << "Âòîðîé ñïèñîê ñîäåðæèò öèêë: " << (hasCycle2 ? "Äà" : "Íåò") << std::endl;
+
+    std::cout << std::endl;
+
+    // Òåñòèðóåì ïóñòîé ñïèñîê
+    std::cout << "=== Ïóñòîé ñïèñîê ===" << std::endl;
+    ListNode* head3 = nullptr;
+    std::cout << "Ñòðóêòóðà ñïèñêà: ";
+    solution.printList(head3);
+    bool hasCycle3 = solution.hasCycle(head3);
+    std::cout << "Òðåòèé ñïèñîê ñîäåðæèò öèêë: " << (hasCycle3 ? "Äà" : "Íåò") << std::endl;
+
+    // Î÷èñòêà ïàìÿòè (äëÿ ñïèñêà áåç öèêëà)
+    delete head2->next->next->next->next;
+    delete head2->next->next->next;
+    delete head2->next->next;
+    delete head2->next;
+    delete head2;
+
+    // Äëÿ ñïèñêà ñ öèêëîì íóæíî àêêóðàòíî óäàëÿòü, ÷òîáû íå ïîïàñòü â áåñêîíå÷íûé öèêë
+    // Ðàçðûâàåì öèêë ïåðåä óäàëåíèåì
+    head->next->next->next->next->next = nullptr;
+    delete head->next->next->next->next;
+    delete head->next->next->next;
+    delete head->next->next;
+    delete head->next;
+    delete head;
+
+    return 0;
+}
